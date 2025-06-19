@@ -2,12 +2,26 @@ import { Telegraf } from 'telegraf';
 import fetch from 'node-fetch';
 import fs from 'fs/promises';
 import dotenv from 'dotenv';
+import express from 'express';
+
 dotenv.config();
 
-const BOT_TOKEN = process.env.BOT_TOKEN || 'твой_токен_здесь';
+const BOT_TOKEN = process.env.BOT_TOKEN || 'ТВОЙ_ТОКЕН_ЗДЕСЬ';
+const bot = new Telegraf(BOT_TOKEN);
+
 const ADMINS_FILE = './admins.json';
 
-const bot = new Telegraf(BOT_TOKEN);
+// ⚠️ Минимальный сервер для Scalingo
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+  res.send('Бот работает ✅');
+});
+
+app.listen(PORT, () => {
+  console.log(`🌐 Сервер слушает порт ${PORT}`);
+});
 
 // Загрузка admins.jslon
 async function loadAdmins() {
@@ -142,27 +156,9 @@ bot.command('del', async ctx => {
 
 // Запуск бота
 bot.launch()
-  .then(() => {
-    console.log('✅ Бот запущен');
-  })
-  .catch(err => {
-    console.error('Ошибка запуска бота:', err);
-    process.exit(1); // аварийный выход
-  });
+  .then(() => console.log('✅ Бот запущен'))
+  .catch(err => console.error('❌ Ошибка запуска бота:', err));
 
-// Слушаем порт для Scalingo
-const port = process.env.PORT || 3000;
-import http from 'http';
-
-http.createServer((req, res) => {
-  res.end('Bot is running');
-}).listen(port, () => {
-  console.log(`Listening on port ${port}`);
-});
-
-// Защита от самозакрытия процесса — простой интервал
-setInterval(() => {}, 1000 * 60 * 60);
-
-// Корректное завершение
+// Обработка завершения
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
