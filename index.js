@@ -141,9 +141,16 @@ bot.command('del', async ctx => {
 });
 
 // Запуск бота
-bot.launch();
-console.log('✅ Бот запущен');
+bot.launch()
+  .then(() => {
+    console.log('✅ Бот запущен');
+  })
+  .catch(err => {
+    console.error('Ошибка запуска бота:', err);
+    process.exit(1); // аварийный выход
+  });
 
+// Слушаем порт для Scalingo
 const port = process.env.PORT || 3000;
 import http from 'http';
 
@@ -152,6 +159,9 @@ http.createServer((req, res) => {
 }).listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
+
+// Защита от самозакрытия процесса — простой интервал
+setInterval(() => {}, 1000 * 60 * 60);
 
 // Корректное завершение
 process.once('SIGINT', () => bot.stop('SIGINT'));
