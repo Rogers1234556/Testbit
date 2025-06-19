@@ -116,30 +116,52 @@ bot.command('zam', async ctx => {
 });
 
 // Команда: /online - вывод онлайн (уровень >=1)
-bot.command('online', async ctx => {
-  if (!(await hasLevel(ctx.from.id, 1))) return ctx.reply('🚫 Нет доступа.');
-  try {
-    const res = await fetch('http://launcher.hassle-games.com:3000/online.json');
-    const data = await res.json();
-    const crmp = data.crmp_new;
-    let totalPlayers = 0;
-    let text = `S | R » Онлайн проекта <a href="https://t.me/hassleonline"><b>"RADMIR CR:MP"</b></a>\n\n`;
-    for (const [serverId, serverData] of Object.entries(crmp)) {
-      const players = serverData.players || 0;
-      const bonus = serverData.bonus || 1;
-      totalPlayers += players;
-      const sid = serverId.toString().padStart(2, '0');
-      text += `${sid}. "<a href="https://t.me/hassleonline">SERVER ${sid}</a> <b>[x${bonus}]</b>", онлайн: <b>${players}</b>\n`;
-    }
-    text += `\n— Суммарный онлайн: <b>${totalPlayers}</b>`;
-    ctx.replyWithHTML(text, { disable_web_page_preview: true });
-  } catch {
-    ctx.reply('❌ Не удалось получить онлайн.');
+
+async function fetchOnlineData() {
+  const res = await fetch('http://launcher.hassle-games.com:3000/online.json')
+  return await res.json()
+}
+
+function generateOnlineText(crmp) {
+  let total = 0
+  let text = `S | R » Онлайн проекта "<a href="https://t.me/hassleonline"><b>RADMIR CR:MP</b></a>"\n\n`
+
+  for (const [id, server] of Object.entries(crmp)) {
+    const sid = id.toString().padStart(2, '0')
+    const players = server.players || 0
+    const bonus = server.bonus || 1
+    total += players
+    text += `${sid}. "<a href="https://t.me/hassleonline">SERVER ${sid}</a> <b>[x${bonus}]</b>", онлайн: <b>${players}</b>\n`
   }
-});
+
+  text += `\n— Суммарный онлайн: <b>${total}</b>`
+  return text
+}
+bot.command('online', async ctx => {
+  if (!(await hasLevel(ctx.from.id, 1))) {
+    return ctx.reply('🚫 Нет доступа.')
+  }
+  try {
+    const data = await fetchOnlineData()
+    const crmp = data.crmp_new
+    const message = generateOnlineText(crmp)
+
+    await ctx.reply(message, {
+      parse_mode: 'HTML',
+      disable_web_page_preview: true
+    })
+  } catch (e) {
+    console.error(e)
+    ctx.reply('❌ Не удалось получить онлайн.')
+  }
+})
 
 // Команда: /sobes - заглушка
-bot.command('sobes', ctx => {
+bot.command('sobes', async ctx => {
+  if (!(await hasLevel(ctx.from.id, 1))) {
+    return ctx.reply('🚫 Нет доступа.');
+  }
+
   ctx.reply('Разработчик пошёл пить пиво 🍺');
 });
 
@@ -152,6 +174,26 @@ bot.command('del', async ctx => {
   if (isNaN(userId)) return ctx.reply('ID должен быть числом.');
   const deleted = await delAdmin(userId);
   ctx.reply(deleted ? `✅ Доступ пользователя ${userId} удалён.` : '❌ Пользователь не найден.');
+});
+
+// Команда: /update - Информация о обновлении
+bot.command('update', async ctx => {
+  if (!(await hasLevel(ctx.from.id, 1))) {
+    return ctx.reply('🚫 Нет доступа.');
+  }
+
+  const text = `
+📦 <b>Обновление бота</b>
+
+🛠️ Были внесены следующие изменения:
+• <code>/online</code> — убрана кнопка "Обновить данные" для стабильной работы
+• Добавлена проверка уровня доступа (>=1) для безопасности
+• Мелкие оптимизации и чистка кода
+
+💡 Продолжаем развивать функционал! Если есть предложения — пиши ✉️
+  `;
+
+  ctx.replyWithHTML(text, { disable_web_page_preview: true });
 });
 
 // Запуск бота
