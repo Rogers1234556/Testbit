@@ -1,12 +1,14 @@
-[
-  {
-    "id": 5087185054,
-    "level": 3,
-    "tag": "@zam"
-  },
-  {
-    "id": "6700728917",
-    "level": 1,
-    "tag": "Roger_Thomson"
-  }
-]
+{
+  "admins": [
+    {
+      "id": 5087185054,
+      "nickname": "Roger_Thomson",
+      "level": 3
+    },
+    {
+      "id": 987654321,
+      "nickname": "JaneDoe",
+      "level": 1
+    }
+  ]
+}
