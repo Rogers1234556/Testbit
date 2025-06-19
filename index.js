@@ -144,6 +144,15 @@ bot.command('del', async ctx => {
 bot.launch();
 console.log('✅ Бот запущен');
 
+const port = process.env.PORT || 3000;
+import http from 'http';
+
+http.createServer((req, res) => {
+  res.end('Bot is running');
+}).listen(port, () => {
+  console.log(`Listening on port ${port}`);
+});
+
 // Корректное завершение
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
