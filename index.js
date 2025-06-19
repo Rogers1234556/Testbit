@@ -9,7 +9,7 @@ const ADMINS_FILE = './admins.json';
 
 const bot = new Telegraf(BOT_TOKEN);
 
-// Загрузка admins.json
+// Загрузка admins.jslon
 async function loadAdmins() {
   try {
     const data = await fs.readFile(ADMINS_FILE, 'utf8');
