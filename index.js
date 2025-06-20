@@ -3,6 +3,8 @@ import fetch from 'node-fetch';
 import fs from 'fs/promises';
 import dotenv from 'dotenv';
 import express from 'express';
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
 
 dotenv.config();
 
@@ -185,15 +187,109 @@ bot.command('update', async ctx => {
   const text = `
 📦 <b>Обновление бота</b>
 
-🛠️ Были внесены следующие изменения:
+<b>Изменения 19.06 | 1.1 </b>
 • <code>/online</code> — убрана кнопка "Обновить данные" для стабильной работы
 • Добавлена проверка уровня доступа (>=1) для безопасности
 • Мелкие оптимизации и чистка кода
 
-💡 Продолжаем развивать функционал! Если есть предложения — пиши ✉️
+<b>Изменения 20.06 | 1.2 </b>
+• Добавлена команда <code>/sub</code> и <code>/unsub</code> для подписки на уведомления о стримах Мараса Шакала
+• Переработана систиме проверки доступа к командам
+• Исправлена задержка <code>/online</code> при использовании
+• Добавлена функционал под команду <code>/admins</code> просмотр списка админов на 19 SERVERE (уровень >=3) (BETA)
+
+💡 Продолжаем развивать функционал! Если есть предложения — пиши ✉️ <a href="https://t.me/Developer116">@Developer116</a>
   `;
 
   ctx.replyWithHTML(text, { disable_web_page_preview: true });
+});
+
+// 📦 Инициализация базы данны
+let db;
+(async () => {
+  db = await open({
+    filename: './stream_subscribers.db',
+    driver: sqlite3.Database
+  });
+
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS subscribers (
+      user_id INTEGER PRIMARY KEY
+    );
+  `);
+})();
+
+// 📩 Подписка
+bot.command('sub', async ctx => {
+  if (!(await hasLevel(ctx.from.id, 1))) {
+    return ctx.reply('🚫 Нет доступа.');
+  }
+
+  try {
+    await db.run('INSERT OR IGNORE INTO subscribers (user_id) VALUES (?)', [ctx.from.id]);
+    ctx.reply('✅ Вы подписались на уведомления о стримах Мараса Шакира!');
+  } catch (err) {
+    ctx.reply('❌ Ошибка при подписке.');
+  }
+});
+
+// ❌ Отписка
+bot.command('unsub', async ctx => {
+  if (!(await hasLevel(ctx.from.id, 1))) {
+    return ctx.reply('🚫 Нет доступа.');
+  }
+
+  try {
+    await db.run('DELETE FROM subscribers WHERE user_id = ?', [ctx.from.id]);
+    ctx.reply('❎ Вы отписались от уведомлений.');
+  } catch (err) {
+    ctx.reply('❌ Ошибка при отписке.');
+  }
+});
+
+// 🔔 Рассылка уведомлений
+async function notifyAll(message) {
+  const subscribers = await db.all('SELECT user_id FROM subscribers');
+  for (const user of subscribers) {
+    bot.telegram.sendMessage(user.user_id, message).catch(() => {});
+  }
+}
+
+// 📺 Проверка стрима (YouTube Data API НЕ используется — парсинг страницы)
+let lastStreamId = null;
+
+async function checkLiveStream() {
+  try {
+    const res = await fetch('https://m.youtube.com/@MarasShakur/live');
+    const html = await res.text();
+
+    const videoIdMatch = html.match(/"videoId":"(.*?)"/);
+    const isLive = html.includes('"isLiveNow":true');
+
+    if (videoIdMatch && isLive) {
+      const videoId = videoIdMatch[1];
+
+      if (videoId !== lastStreamId) {
+        lastStreamId = videoId;
+        const url = `https://www.youtube.com/watch?v=${videoId}`;
+        await notifyAll(`🔴 Марас Шакир запустил стрим!\n📺 Смотри тут: ${url}`);
+        console.log(`Отправлено уведомление: ${url}`);
+      }
+    }
+  } catch (err) {
+    console.error('Ошибка при проверке стрима:', err.message);
+  }
+}
+
+// 🔁 Проверка каждые 2 минуты
+setInterval(checkLiveStream, 2 * 60 * 1000);
+
+bot.command('admins', async ctx => {
+  if (!(await hasLevel(ctx.from.id, 1))) {
+    return ctx.reply('🚫 Нет доступа.');
+  }
+
+  ctx.reply('Данная команда находится в разработке ⚒️');
 });
 
 // Запуск бота
