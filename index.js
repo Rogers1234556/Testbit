@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
+import { setupCheats } from './cheat.js'; // без require
 
 dotenv.config();
 
@@ -291,6 +292,8 @@ bot.command('admins', async ctx => {
 
   ctx.reply('Данная команда находится в разработке ⚒️');
 });
+
+setupCheats(bot, hasLevel);
 
 // Запуск бота
 bot.launch()
