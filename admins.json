@@ -2,13 +2,18 @@
   "admins": [
     {
       "id": 5087185054,
-      "nickname": "Roger_Thomson",
+      "nickname": "Рогер 🙈",
       "level": 3
     },
     {
-      "id": 987654321,
-      "nickname": "JaneDoe",
-      "level": 1
+      "id": 7336234687,
+      "level": 2,
+      "nickname": "Руслан 👨‍💻"
+    },
+    {
+      "id": 7051185663,
+      "level": 2,
+      "nickname": "Андрей 🤠"
     }
   ]
 }
