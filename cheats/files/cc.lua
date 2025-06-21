@@ -16,7 +16,7 @@ function main()
     if not isSampAvailable() then return false end
 
         sampAddChatMessage(
-            "{ffffff}ДЕЛО В ШЛЯПЕ, вводи /cc чтобы ебашить все нахуй блять",
+            "{ffffff}Г„Г…Г‹ГЋ Г‚ ГГ‹ГџГЏГ…, ГўГўГ®Г¤ГЁ /cc Г·ГІГ®ГЎГ» ГҐГЎГ ГёГЁГІГј ГўГ±ГҐ Г­Г ГµГіГ© ГЎГ«ГїГІГј",
             -1
         )
 
@@ -25,9 +25,9 @@ function main()
         function()
                 hard_rvanka = not hard_rvanka
                 if hard_rvanka then
-                    sampAddChatMessage("{ffffff}Начинаем шакалить всех и всех))", -1)
+                    sampAddChatMessage("{ffffff}ГЌГ Г·ГЁГ­Г ГҐГ¬ ГёГ ГЄГ Г«ГЁГІГј ГўГ±ГҐГµ ГЁ ГўГ±ГҐГµ))", -1)
                 else
-                    sampAddChatMessage("{ffffff}Ты че баклан? вруби обратно!(!", -1)
+                    sampAddChatMessage("{ffffff}Г’Г» Г·ГҐ ГЎГ ГЄГ«Г Г­? ГўГ°ГіГЎГЁ Г®ГЎГ°Г ГІГ­Г®!(!", -1)
                 end
         end
     )
