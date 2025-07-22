@@ -4,24 +4,26 @@ import fs from 'fs/promises';
 import dotenv from 'dotenv';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
-import express from 'express';
 dotenv.config();
 
 const ADMINS_FILE = './admins.json';
 let db;
 
-// ⚠️ Минимальный сервер для Scalingo
+import express from 'express';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
+app.get('/', (_, res) => {
   res.send('Бот работает ✅');
 });
+
+bot.telegram.setWebhook(`${process.env.WEBHOOK_URL}/bot${process.env.BOT_TOKEN}`);
+app.use(bot.webhookCallback(`/bot${process.env.BOT_TOKEN}`));
 
 app.listen(PORT, () => {
   console.log(`🌐 Сервер слушает порт ${PORT}`);
 });
-
 
 // Загружаем админов из JSON
 async function loadAdmins() {
@@ -353,10 +355,6 @@ bot.on('message', (ctx) => {
     }
   }
 });
-
-
-bot.launch();
-console.log('🤖 Бот запущен!');
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
 process.once('SIGTERM', () => bot.stop('SIGTERM'));
