@@ -1,28 +1,21 @@
 import { Telegraf, Markup } from 'telegraf';
 import fetch from 'node-fetch';
+import express from 'express';
 import fs from 'fs/promises';
 import dotenv from 'dotenv';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 dotenv.config();
 
+const bot = new Telegraf(process.env.BOT_TOKEN);
 const ADMINS_FILE = './admins.json';
 let db;
-
-import express from 'express';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.get('/', (_, res) => {
   res.send('Бот работает ✅');
-});
-
-bot.telegram.setWebhook(`${process.env.WEBHOOK_URL}/bot${process.env.BOT_TOKEN}`);
-app.use(bot.webhookCallback(`/bot${process.env.BOT_TOKEN}`));
-
-app.listen(PORT, () => {
-  console.log(`🌐 Сервер слушает порт ${PORT}`);
 });
 
 // Загружаем админов из JSON
@@ -354,6 +347,14 @@ bot.on('message', (ctx) => {
       );
     }
   }
+});
+
+bot.telegram.setWebhook(`${process.env.WEBHOOK_URL}/bot${process.env.BOT_TOKEN}`);
+app.use(bot.webhookCallback(`/bot${process.env.BOT_TOKEN}`));
+
+// Старт сервера
+app.listen(PORT, () => {
+  console.log(`🌐 Сервер слушает порт ${PORT}`);
 });
 
 process.once('SIGINT', () => bot.stop('SIGINT'));
