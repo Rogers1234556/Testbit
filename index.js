@@ -9,6 +9,19 @@ dotenv.config();
 const ADMINS_FILE = './admins.json';
 let db;
 
+// ⚠️ Минимальный сервер для Scalingo
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+  res.send('Бот работает ✅');
+});
+
+app.listen(PORT, () => {
+  console.log(`🌐 Сервер слушает порт ${PORT}`);
+});
+
+
 // Загружаем админов из JSON
 async function loadAdmins() {
   try {
@@ -343,3 +356,6 @@ bot.on('message', (ctx) => {
 
 bot.launch();
 console.log('🤖 Бот запущен!');
+
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
